@@ -13,6 +13,8 @@ clean read:
      word, so the whole line is one setup-punch beat.
   4. Freshness: AI + weddings is a new pairing, not a recycled
      knock-knock or "why did the chicken cross" frame.
+  5. Clean read: no control characters, no trailing whitespace, one
+     sentence per beat — the line reads out loud exactly as written.
 
 Delete the second sentence and the joke loses its meaning: the AI
 agreeing to the T&Cs *before* the vows is the punchline, not decoration.
@@ -34,8 +36,16 @@ def check_len(text, lo=1, hi=200):
 
 
 def check_gate(text):
-    """Mirror the bounty gate: UTF-8, 1-200 chars, not whitespace only."""
+    """Mirror the bounty gate, plus the judge's clean-read bar.
+
+    UTF-8, 1-200 chars, not whitespace only — and no control characters:
+    the judge reads the line out loud, so anything that cannot be read
+    cleanly (tab, NUL, escape sequences) fails here, not on stage.
+    """
     text.encode("utf-8")
+    bad = [ch for ch in text if ord(ch) < 0x20 and ch not in "\n"]
+    assert not bad, f"entry has control characters: {[hex(ord(c)) for c in bad]}"
+    assert text == text.strip(), "entry must not start/end with whitespace"
     return check_len(text)
 
 
